@@ -1,12 +1,15 @@
-import { create as createJWT, verify as verifyJWT  } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
+import { create as createJWT  } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
 import { KEY, sendError } from "./util.ts";
 import { Methods } from "./methods.ts";
 
 export class MonnaServer {
     private server: Deno.HttpServer | null = null
-    methods: Methods = new Methods();
-
-    constructor(public port: number) {}
+    
+    constructor(
+        public port: number,
+        public tokenTimeMin: number = 60,
+        public methods: Methods = new Methods(tokenTimeMin),
+    ) {}
 
     async stop() {
         await this.server?.shutdown()
@@ -14,7 +17,8 @@ export class MonnaServer {
     }
 
     async createJWT(payload: {}) {
-        return await createJWT({ alg: "HS512", typ: "JWT" }, payload, KEY);
+        const iat = Math.floor(Date.now());
+        return await createJWT({ alg: "HS512", typ: "JWT" }, {...payload, iat}, KEY);
     }
 
     async serve() {
@@ -58,6 +62,7 @@ export class MonnaServer {
                     return sendError(socket, dat.id, "Params should be Array");
                 }
 
+                // Check that this is notificaition
                 const isNotification = dat.noreturn === true;
 
                 // Execute Monna methods
@@ -67,9 +72,9 @@ export class MonnaServer {
                     return;
                 } catch (e) {
                     if (e instanceof Error) {
-                        sendError(socket, dat.id, e.message)
+                        return sendError(socket, dat.id, e.message)
                     } else {
-                        sendError(socket, dat.id, "Unknown error type: " + e);
+                        return sendError(socket, dat.id, "Unknown error type: " + e);
                     }
                 }
             });

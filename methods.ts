@@ -6,7 +6,7 @@ export class Methods {
     private methods: {[key: string]: Method} = {}
     private secured: string[] = [];
 
-    constructor() {}
+    constructor(private tokenTimeMin: number) {}
 
     all() {
         return Object.keys(this.methods);
@@ -26,12 +26,15 @@ export class Methods {
         if (!method) throw new Error("No method: " + name);
         if (this.isSecured(name)) {
             try {
-                if (!token) throw new Error("No token");
+                if (!token) throw new Error("Auth failed. No token");
                 const payload = await verifyJWT(token, KEY);
+                if (!payload.iat || this.isExpired(payload.iat)) {
+                    throw new Error("Auth failed. Token expired");
+                }
                 return await method(payload, ...args);
             } catch(e) {
                 if (e instanceof Error && e.message.indexOf("signature does not match") !== -1) {
-                    throw new Error("Auth failed. Cause: " + e.message);
+                    throw new Error("Auth failed. " + e.message);
                 } else {
                     throw e;
                 }
@@ -43,5 +46,11 @@ export class Methods {
 
     isSecured(name: string) {
         return this.secured.filter(n => n == name).length > 0;
+    }
+
+    private isExpired(iat: number): boolean {
+        const difference = Date.now() - iat;
+        const maxTimeMs = this.tokenTimeMin * 60 * 1000;
+        return difference > maxTimeMs
     }
 }
