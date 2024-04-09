@@ -48,6 +48,10 @@ export class MonnaServer {
                     return sendError(socket, dat.id, "Wrong type. 'MonnaRPC' required");
                 }
 
+                if (typeof dat.name !== "string") {
+                    return sendError(socket, dat.id, "No name of the method to run");
+                }
+
                 // Message should have "params" as Array
                 if (!Array.isArray(dat.params)) {
                     return sendError(socket, dat.id, "Params should be Array");

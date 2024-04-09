@@ -5,5 +5,5 @@ export const KEY = await crypto.subtle.generateKey(
 );
 
 export function sendError(socket: WebSocket, id: string, message: string) {
-    socket.send(JSON.stringify({id, error: message}));
+    socket.send(JSON.stringify({id, error: message, type: "MonnaRPC"}));
 }
