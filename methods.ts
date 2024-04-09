@@ -1,5 +1,6 @@
 import { Method, MethodSecured } from "./common.ts";
 import { KEY } from "./util.ts";
+import { verify as verifyJWT  } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
 
 export class Methods {
     private methods: {[key: string]: Method} = {}
@@ -43,8 +44,4 @@ export class Methods {
     isSecured(name: string) {
         return this.secured.filter(n => n == name).length > 0;
     }
-}
-
-function verifyJWT(arg0: string, KEY: any) {
-  throw new Error("Function not implemented.");
 }
