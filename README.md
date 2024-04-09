@@ -1,5 +1,9 @@
 # Monna Server
 
+## What is that?
+* This is `Monna Server`. Server with `MonnaRPC` support
+* It allows you to create online games based on `Monna Histea Engine`
+
 ## How it works?
 * Refer to [Monna RPC documentation](doc/MonnaRPC.md)
 
