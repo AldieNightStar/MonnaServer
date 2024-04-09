@@ -43,13 +43,14 @@ export class MonnaServer {
                 // Ignore messages with no id
                 if (dat.id === undefined || dat.id === null) return;
 
+                // Check name is present
+                if (typeof dat.name !== "string") {
+                    return sendError(socket, dat.id, "No name of the method to run");
+                }
+
                 // Type should be MonnaRPC
                 if (dat.type !== "MonnaRPC") {
                     return sendError(socket, dat.id, "Wrong type. 'MonnaRPC' required");
-                }
-
-                if (typeof dat.name !== "string") {
-                    return sendError(socket, dat.id, "No name of the method to run");
                 }
 
                 // Message should have "params" as Array
@@ -57,10 +58,13 @@ export class MonnaServer {
                     return sendError(socket, dat.id, "Params should be Array");
                 }
 
+                const isNotification = dat.noreturn === true;
+
                 // Execute Monna methods
                 try {
                     const response = await this.methods.exec(dat.name, dat.params, jwt);
-                    return socket.send(JSON.stringify({id: dat.id, result: response, type: "MonnaRPC"}));
+                    if (!isNotification) socket.send(JSON.stringify({id: dat.id, result: response, type: "MonnaRPC"}));
+                    return;
                 } catch (e) {
                     if (e instanceof Error) {
                         sendError(socket, dat.id, e.message)
