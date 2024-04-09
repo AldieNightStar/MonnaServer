@@ -27,7 +27,7 @@ export class Methods {
         if (this.isSecured(name)) {
             try {
                 if (!token) throw new Error("No token");
-                const payload = verifyJWT(token, KEY);
+                const payload = await verifyJWT(token, KEY);
                 return await method(payload, ...args);
             } catch(e) {
                 if (e instanceof Error && e.message.indexOf("signature does not match") !== -1) {
