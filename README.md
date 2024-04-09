@@ -15,7 +15,8 @@
 import { MonnaServer } from "https://raw.githubusercontent.com/AldieNightStar/MonnaServer/main/mod.ts"
 
 // Create new Server
-const m = new MonnaServer(8080, 1);
+// 60 - means 60 minutes JWT living time
+const m = new MonnaServer(8080, 60);
 
 // Add couple of methods
 m.methods.add("echo", async (...args) => args);
